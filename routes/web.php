@@ -1,6 +1,7 @@
 <?php
 
 use DefStudio\Telegraph\Facades\Telegraph as TelegraphFacade;
+use DefStudio\Telegraph\Handlers\WebhookHandler;
 use DefStudio\Telegraph\Models\TelegraphBot;
 use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Support\Facades\Route;
@@ -17,16 +18,17 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    /*
-     * registerWebhook And Show Result
-     $reponse = \DefStudio\Telegraph\Facades\Telegraph::registerWebhook()->send();
-     dd($reponse->json());
-     registerWebhook And Show Result
-    */
-
     /** @var TelegraphChat $chat */
-    TelegraphFacade::chat('194412981')->message('ok')->send();
- //   $chat = $bot->chats()->create([ 'chat_id' => '88550255','name' => 'mimdeveloper']);
+    TelegraphFacade::chat('88550255')->message('ok')->send();
    return response()->json(['status' => 'send']);
 
+});
+
+Route::get('/request/test', function () {
+
+    /** @var class-string $handler */
+    $handler = config('telegraph.webhook_handler');
+
+    /** @var \App\Handlers\AdministratorHandler $handler */
+    $handler = app($handler)->bookmarkUpdateAction('dasdda');
 });
