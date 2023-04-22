@@ -25,7 +25,7 @@ Route::get('/', function () {
     */
 
     /** @var TelegraphChat $chat */
-    TelegraphFacade::chat('88550255')->message('ok')->send();
+    TelegraphFacade::chat('194412981')->message('ok')->send();
  //   $chat = $bot->chats()->create([ 'chat_id' => '88550255','name' => 'mimdeveloper']);
    return response()->json(['status' => 'send']);
 
