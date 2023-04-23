@@ -30,5 +30,5 @@ Route::get('/request/test', function () {
     $handler = config('telegraph.webhook_handler');
 
     /** @var \App\Handlers\AdministratorHandler $handler */
-    $handler = app($handler)->bookmarkUpdateAction('dasdda');
+    $handler = app($handler)->bookmarkApproveInput('سلام.مامان. بابا کجایی .من');
 });

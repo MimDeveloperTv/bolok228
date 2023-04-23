@@ -18,13 +18,7 @@ class AdministratorHandler extends BaseHandler
     protected function handleChatMessage(Stringable $text): void
     {
         if(str_contains($text, '.')){
-            $stateAction =  $this->bookmarkUpdateAction($text);
-            if($stateAction == true){
-                $this->newbookmark();
-            }
-            else{
-                $this->reportError();
-            }
+          $this->bookmarkApproveInput($text);
         }
         else{
             $this->chat->markdown("no understand your message")->send();
@@ -56,12 +50,15 @@ class AdministratorHandler extends BaseHandler
         $this->chat->message(" عنوان : {$bk->title}")->send();
     }
 
-    public function bookmarkUpdateAction(Stringable $text)
+    public function bookmarkUpdateAction()
     {
-        $selectedBookmarkId =  $this->chat->storage()->get('id','1');
-         $dbBookmark =  bookmark::query()->find($selectedBookmarkId);
-         $dbBookmark->bookmarks = $text;
-         return $dbBookmark->save();
+        $selectedId =  $this->chat->storage()->get('id','1');
+        $selectedBookmarks =  $this->chat->storage()->get('bookmarks','');
+         $dbBookmark =  bookmark::query()->find($selectedId);
+         $dbBookmark->bookmarks = $selectedBookmarks;
+         $dbBookmark->save();
+         $this->deleteKeyboard();
+         $this->newbookmark();
     }
 
     public function reportError()
@@ -69,7 +66,21 @@ class AdministratorHandler extends BaseHandler
         $this->chat->message("Error")->send();
     }
 
+     public function bookmarkApproveInput(Stringable $text){
+        $bookmarks =  explode('.',$text);
+        $safeBookmarks = [];
+       foreach ($bookmarks as $bookmark)
+       {
+           $bookmark =  trim($bookmark);
+           $safeBookmarks[] = $bookmark;
+       }
 
-
+        $keyboard = Keyboard::make()->row(
+            [Button::make('Update')->action('bookmarkUpdateAction')->param('Approve', 'true')]
+        );
+        $this->chat->storage()->set('bookmarks',implode('\r\n',$safeBookmarks));
+        $this->chat->message("برچسب های زیر را تایید کنید وگرنه دوباره وارد نمایید")->send();
+        $this->chat->message(implode('-',$safeBookmarks))->keyboard($keyboard)->send();
+    }
 
 }
