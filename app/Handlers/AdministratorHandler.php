@@ -117,4 +117,18 @@ class AdministratorHandler extends BaseHandler
         $this->chat->message(implode('-',$safeBookmarks))->keyboard($keyboard)->send();
     }
 
+    public function resetbookmark(): void
+    {
+        $id =  1;
+        $bk = bookmark::query()->orderBy('id','ASC')
+            ->where('bookmarks','')
+            ->where('id','>=',$id)
+            ->first();
+        $this->chat->storage()->set('id',$bk->id);
+        $this->chat->storage()->set('title',$bk->title);
+        $this->chat->message(" شماره : {$bk->id}")->send();
+        $this->chat->message(" عنوان : {$bk->title}")->send();
+    }
+
+
 }
