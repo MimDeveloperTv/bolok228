@@ -10,9 +10,11 @@ class mark extends Model
     use HasFactory;
 
     protected $primaryKey = 'id';
-    
+
      protected $fillable = [
         'title',
-        'mark'
+        'mark',
+         'bookmark_id',
+         'user'
     ];
 }

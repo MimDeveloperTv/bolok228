@@ -83,6 +83,8 @@ class AdministratorHandler extends BaseHandler
         foreach ($Bookmarks as $bookmark)
         {
             mark::query()->create([
+                'bookmark_id' => (int) $selectedId,
+                'user' =>  $this->chat->chat_id,
                 'title' => $selectedTitle,
                 'mark' => $bookmark,
             ]);
