@@ -2,9 +2,11 @@
 
 namespace App\Handlers;
 
+use App\Enums\Commands;
 use App\Exceptions\NotAllowRegisterUserException;
 use App\Models\bookmark;
 use App\Models\mark;
+use App\Utils\Helpers;
 use DefStudio\Telegraph\DTO\InlineQuery;
 use DefStudio\Telegraph\Keyboard\Button;
 use DefStudio\Telegraph\Keyboard\Keyboard;
@@ -18,18 +20,25 @@ use Illuminate\Support\Stringable;
 
 class AdministratorHandler extends BaseHandler
 {
+    public BaseHandler $help;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->help = new Helpers();
+    }
+
+    /**
+     * @throws \DefStudio\Telegraph\Exceptions\StorageException
+     */
     protected function handleChatMessage(Stringable $text): void
     {
-        if ($this->chat->storage()->get('command') == 'setnumberbookmark') {
-            $this->setNumberBookmark($text);
-
-        } elseif ($this->chat->storage()->get('command') == 'cleanbookmark') {
-            $this->processCleanBookmark($text);
-        } elseif (str_contains($text, '.')) {
-            $this->bookmarkApproveInput($text);
-        } else {
-            $this->chat->markdown("no understand your message")->send();
-        }
+        match ($this->help->getChatStorageCommand()) {
+            Commands::SET_NUMBER_BOOKMARK => $this->setNumberBookmark($text),
+            Commands::CLEAN_BOOKMARK => $this->processCleanBookmark($text),
+            '******' => $this->bookmarkApproveInput($text),
+            default => $this->chat->markdown("no understand your message")->send(),
+        };
     }
 
     /**
@@ -37,7 +46,7 @@ class AdministratorHandler extends BaseHandler
      */
     public function newbookmark(): void
     {
-        $id = (int)$this->chat->storage()->get('id', '1');
+        $id = $this->help->getChatStorageId();
         $bk = bookmark::query()->orderBy('id', 'ASC')
             ->where('bookmarks', '')
             ->where('id', '>=', $id)
@@ -54,7 +63,7 @@ class AdministratorHandler extends BaseHandler
 
     public function nextbookmark(): void
     {
-        $id = ((int)$this->chat->storage()->get('id', '1')) + 1;
+        $id = $this->help->getChatStorageId() + 1;
         $bk = bookmark::query()->orderBy('id', 'ASC')
             ->where('bookmarks', '')
             ->where('id', '>=', $id)
@@ -67,7 +76,7 @@ class AdministratorHandler extends BaseHandler
 
     public function bookmarkUpdateAction()
     {
-        $selectedId = $this->chat->storage()->get('id', '1');
+        $selectedId = $this->help->getChatStorageId();
         $selectedTitle = $this->chat->storage()->get('title', '1');
         $selectedBookmarks = $this->chat->storage()->get('bookmarks', '');
         $Bookmarks = explode(',', $selectedBookmarks);
@@ -87,19 +96,9 @@ class AdministratorHandler extends BaseHandler
 
     }
 
-    public function reportError()
-    {
-        $this->chat->message("Error")->send();
-    }
-
     public function bookmarkApproveInput(Stringable $text)
     {
-        $bookmarks = explode('.', $text);
-        $safeBookmarks = [];
-        foreach ($bookmarks as $bookmark) {
-            $bookmark = trim($bookmark);
-            $safeBookmarks[] = $bookmark;
-        }
+        $safeBookmarks = $this->help->prepareArrayCleanedInput($text);
 
         $keyboard = Keyboard::make()->row(
             [Button::make('Update')->action('bookmarkUpdateAction')->param('Approve', 'true')]
@@ -124,7 +123,7 @@ class AdministratorHandler extends BaseHandler
 
     public function cleanbookmark(): void
     {
-        $this->chat->storage()->set('command', 'cleanbookmark');
+        $this->help->setChatStorageCommand(Commands::CLEAN_BOOKMARK);
         $this->chat->message("هشتگ های نقطه دار خود را وارد کنید")->send();
     }
 
@@ -136,26 +135,13 @@ class AdministratorHandler extends BaseHandler
 
     public function numberbookmark($input): void
     {
-        $this->chat->storage()->set('command', 'setnumberbookmark');
+        $this->help->setChatStorageCommand(Commands::SET_NUMBER_BOOKMARK);
         $this->chat->message("شمارنده وارد کنید")->send();
-    }
-
-    public static function prepareValidInputData(array $inputArray)
-    {
-        $safeArray = [];
-        foreach ($inputArray as $input) {
-            if (!empty($input)) {
-                $safeArray[] = trim($input);
-            }
-        }
-        return $safeArray;
     }
 
     public function processCleanBookmark($input)
     {
-        $inputToArray = explode('.', $input);
-        $safeInputArray = self::prepareValidInputData($inputToArray);
-        $uniqueInputArray = array_unique($safeInputArray);
+        $uniqueInputArray = $this->help->prepareArrayUniquedInput($input);
 
         $counter = (int)$this->chat->storage()->get('numberbookmark', '1');
         $counterArray = [];
