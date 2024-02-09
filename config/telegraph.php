@@ -7,7 +7,9 @@ return [
      * Telegram api base url, it can be overridden
      * for self-hosted servers
      */
-    'telegram_api_url' => 'https://api.telegram.org/',
+     
+   'telegram_api_url' => 'https://api.telegram.org/',
+    
 
     /*
      * Sets Telegraph messages default parse mode
@@ -34,7 +36,7 @@ return [
      * If enabled, Telegraph dumps received
      * webhook messages to logs
      */
-    'debug_mode' => false,
+    'debug_mode' => true,
 
     /*
      * If enabled, unknown webhook commands are

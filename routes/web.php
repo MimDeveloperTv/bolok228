@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     /** @var TelegraphChat $chat */
-    TelegraphFacade::chat('88550255')->message('ok')->send();
+    TelegraphFacade::chat('729291442')->message('ok')->send();
    return response()->json(['status' => 'send']);
 
 });
@@ -31,4 +31,11 @@ Route::get('/request/test', function () {
 
     /** @var \App\Handlers\AdministratorHandler $handler */
     $handler = app($handler)->bookmarkApproveInput('سلام.مامان. بابا کجایی .من');
+});
+
+Route::get('/setwebhook', function () {
+    $reponse = \DefStudio\Telegraph\Facades\Telegraph::registerWebhook()
+    ->bot('1893970965:zKxrA1iPNSLigVbgNF8oakjI2DQnX4NAFz8taOsx')->send();
+
+    dd($reponse->json());
 });

@@ -12,6 +12,7 @@ use DefStudio\Telegraph\Keyboard\ReplyKeyboard;
 use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
+use Illuminate\Support\Facades\Log;
 
 class BaseHandler extends WebhookHandler
 {
@@ -39,7 +40,13 @@ class BaseHandler extends WebhookHandler
 
     public function start(): void
     {
+        Log::info('dsadsadasdasdas');
         $this->chat->html("You Are Welcome,Please type operations")->send();
+    }
+    
+    public function photo(): void
+    {
+        $this->chat->photo('https://bolok228.chbk.run/test.jpg')->send();
     }
 
     public function test(): void
